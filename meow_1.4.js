@@ -1,6 +1,6 @@
 /*
  * Author: Howard Wonanut
- * Date: 2020-10-29
+ * Date: 2020-10-31
  * Description: 2020年淘宝双11养猫自动脚本
  * Version: 1.4
  */
@@ -227,7 +227,7 @@ function dotask_taobao() {
                 task_btn_index++;
             }
             else {
-                task_list[task_index]++;
+                task_cnt_list[task_index]++;
                 printLog("正在执行[" + task + "]任务", -1);
 
                 scollSrceen(4);
