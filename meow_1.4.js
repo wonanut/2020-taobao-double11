@@ -2,7 +2,7 @@
  * Author: Howard Wonanut
  * Date: 2020-10-31
  * Description: 2020年淘宝双11养猫自动脚本
- * Version: 1.4
+ * Version: 1.4.4
  */
 
 var VERSION_MAJOR = 1
@@ -120,8 +120,16 @@ function dotask_lumiao() {
         data: "taobao://pages.tmall.com/wow/z/hdwk/act-20201111/index"
     });
     randomSleep(3000, 1000);
-    className("android.widget.Button").text("赚喵币").waitFor();
-
+    
+    if (textContains("我的战报").exists()) {
+        printLog("检测到当前在战队页面，自动返回到猫猫页面", -1);
+        back();
+        randomSleep(1000, 1000);
+    }
+    else {
+        className("android.widget.Button").text("赚喵币").waitFor();
+    }
+    
     printLog("开始[点猫猫], 共点击" + PAT_TIMES + "次", -1);
     for(var i = 0; i < PAT_TIMES ; i++) {
         randomSleep(100, 200);
@@ -177,6 +185,54 @@ function dotask_taobao() {
         printLog("[签到]成功", -1);
     }
 
+    var task_list = ["去浏览", "去逛逛", "去完成", "去搜索"];
+    var task_cnt_list = [0, 0, 0, 0];
+
+    task_list.forEach(task => {
+        printLog("正在检测可执行的["+ task + "]任务", 1);
+        var task_index = task_list.indexOf(task);
+        var task_btn_index = 0;
+
+        while (textContains(task).exists) {
+            var button = text(task).findOnce(task_btn_index);
+            if (button == null) break;
+
+            button.click();
+            randomSleep(4000, 3000);
+            
+            // 如果进入直播页面直接跳过
+            if (textContains("观看").exists() && textContains("关注").exists()) {
+                printLog("自动跳过[直播]任务", -1);
+            }
+            if (textContains("淘宝特价版送红包").exists()) {
+                printLog("自动跳过[淘宝特价版送红包]任务", -1);
+                task_btn_index++;
+            }
+            else if (textContains("充值").exists()) {
+                printLog("自动跳过[充值]任务", -1);
+                task_btn_index++;
+            }
+            else {
+                task_cnt_list[task_index]++;
+                printLog("正在执行[" + task + "]任务", -1);
+
+                scollSrceen(4);
+                randomSleep(1000, 1000);
+                printLog("已经完成第" + task_cnt_list[task_index] + "个[" + task + "]任务", -1);
+            }
+
+            back();
+            randomSleep(2000, 1000);
+
+            if (task == "去逛逛" && task_cnt_list[task_index] >= 10) break;
+            if (task == "去完成" && task_cnt_list[task_index] >= 12) break;
+            if (task == "去搜索" && task_cnt_list[task_index] >= 20) break;
+        }
+
+        randomSleep(1000, 1000);
+        printLog("当前没有[" + task + "]任务，或者存在无法正常执行任务，请手动解决", 1);
+    });
+
     // 领取奖励
     while (textContains("领取奖励").exists) {
         var button = text("领取奖励").findOnce();
@@ -200,52 +256,6 @@ function dotask_taobao() {
     }
     randomSleep(2000, 1000);
     printLog("当前没有[我知道了]任务", 1);
-
-    var task_list = ["去浏览", "去逛逛", "去完成", "去搜索"];
-    var task_cnt_list = [0, 0, 0, 0];
-
-    exit_flag = true;
-
-    task_list.forEach(task => {
-        printLog("正在检测可执行的["+ task + "]任务", 1);
-        var task_index = task_list.indexOf(task);
-        var task_btn_index = 0;
-
-        while (textContains(task).exists) {
-            var button = text(task).findOnce(task_btn_index);
-            if (button == null) break;
-
-            button.click();
-            randomSleep(4000, 3000);
-            
-            // 如果进入直播页面直接跳过
-            if (task == "去完成" && textContains("观看").exists() && textContains("关注").exists()) {
-                printLog("自动跳过[直播]任务", -1);
-            }
-            if (textContains("淘宝特价版送红包").exists()) {
-                printLog("自动跳过[淘宝特价版送红包]任务", -1);
-                task_btn_index++;
-            }
-            else {
-                task_cnt_list[task_index]++;
-                printLog("正在执行[" + task + "]任务", -1);
-
-                scollSrceen(4);
-                randomSleep(1000, 1000);
-                printLog("已经完成第" + task_cnt_list[task_index] + "个[" + task + "]任务", -1);
-            }
-
-            back();
-            randomSleep(2000, 1000);
-
-            if (task == "去逛逛" && task_cnt_list[task_index] >= 10) break;
-            if (task == "去完成" && task_cnt_list[task_index] >= 12) break;
-            if (task == "去搜索" && task_cnt_list[task_index] >= 20) break;
-        }
-
-        randomSleep(1000, 1000);
-        printLog("当前没有[" + task + "]任务，或者存在无法正常执行任务，请手动解决", 1);
-    });
 
     printLog("[淘宝赚喵币]任务完成！", 0);
     randomSleep(1000, 1000);
